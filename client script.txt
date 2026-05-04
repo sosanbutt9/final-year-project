@@ -1,0 +1,106 @@
+function($scope, $sce, $interval) {
+    var c = this;
+    c.activeTab = "jd";
+    c.jdFile = null;
+    c.jdUrl = null;
+
+    c.resumeFiles = [];
+    c.resumeUrls = [];
+
+    c.selectedModel = "chatgpt"; // default
+    c.loading = false;
+    c.progress = 0;
+    c.strokeOffset = 339.292;
+    c.resultAvailable = false;
+    c.results = [];
+
+    // Resume Upload Preview (multiple)
+    document.getElementById("resume-upload").addEventListener("change", function () {
+        c.resumeFiles = Array.from(this.files).filter(f => f.type === "application/pdf");
+        c.resumeUrls = [];
+        c.resumeFiles.forEach(file => {
+            var fileUrl = URL.createObjectURL(file);
+            c.resumeUrls.push($sce.trustAsResourceUrl(fileUrl));
+        });
+        $scope.$apply();
+    });
+
+    // Job Description Upload Preview
+    document.getElementById("jd-upload").addEventListener("change", function () {
+        c.jdFile = this.files[0];
+        if (c.jdFile && c.jdFile.type === "application/pdf") {
+            var fileUrl = URL.createObjectURL(c.jdFile);
+            $scope.$apply(() => {
+                c.jdUrl = $sce.trustAsResourceUrl(fileUrl);
+            });
+        }
+    });
+
+    // Utility: Convert file to Base64
+    function readFile(file, callback) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            callback({
+                name: file.name,
+                data: e.target.result.split(",")[1]
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Progress Animation
+    function startProgress() {
+        c.progress = 0;
+        c.strokeOffset = 339.292;
+        var interval = $interval(function() {
+            if (c.progress < 95) {
+                c.progress++;
+                c.strokeOffset = 339.292 - (339.292 * c.progress / 100);
+            }
+        }, 50);
+        return interval;
+    }
+
+    // Save Files & Trigger GPT Comparison
+    c.saveFiles = function() {
+        if (!c.jdFile || c.resumeFiles.length === 0) {
+            alert("⚠ Please upload Job Description and at least one Resume.");
+            return;
+        }
+
+        c.loading = true;
+        c.resultAvailable = false;
+
+        var progressInterval = startProgress();
+
+        readFile(c.jdFile, function(jdData) {
+            var resumePayloads = [];
+            var processed = 0;
+
+            c.resumeFiles.forEach(function(file) {
+                readFile(file, function(resumeData) {
+                    resumePayloads.push(resumeData);
+                    processed++;
+                    if (processed === c.resumeFiles.length) {
+                        // All resumes processed
+                        c.server.get({
+                            action: "compareAndCreateMultiple",
+                            resumes: resumePayloads,
+                            jd: jdData,
+                            model: c.selectedModel
+                        }).then(function(response) {
+                            $interval.cancel(progressInterval);
+
+                            c.progress = 100;
+                            c.strokeOffset = 0;
+
+                            c.loading = false;
+                            c.resultAvailable = true;
+                            c.results = response.data.results || [];
+                        });
+                    }
+                });
+            });
+        });
+    };
+}

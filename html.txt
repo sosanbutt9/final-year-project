@@ -1,0 +1,86 @@
+<div class="container">
+  <h2 class="title">📂 Job Description & Resume Analyzer</h2>
+  <p class="subtitle">Upload JD and multiple resumes to compare candidate fit.</p>
+
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <div class="upload-box">
+      <label class="upload-label">Upload Job Description (PDF)</label>
+      <input type="file" id="jd-upload" accept="application/pdf" />
+      
+    </div>
+    <div class="upload-box">
+      <label class="upload-label">Upload Resumes (PDFs)</label>
+      <input type="file" id="resume-upload" accept="application/pdf" multiple />
+    </div>
+  </div>
+
+  <!-- Model Selector -->
+  <div class="model-selector">
+    <label for="model">Select AI Model:</label>
+    <select id="model" ng-model="c.selectedModel" class="form-control">
+      <option value="chatgpt">ChatGPT</option>
+      <option value="deepseek">DeepSeek</option>
+    </select>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <a href="/sp1?id=job_history_details" class="btn-primary" style="margin-right:15px;">
+      <span>View History</span>
+    </a>
+    <button ng-click="c.saveFiles()" class="btn-primary" ng-disabled="c.loading">
+      <span ng-if="!c.loading">💾 Analyze</span>
+      <span ng-if="c.loading">⏳ Analyzing...</span>
+    </button>
+  </div>
+
+  <!-- Result Panel -->
+  <div class="result-panel" ng-if="c.resultAvailable">
+    <div class="result-card"
+         ng-repeat="res in c.results track by $index"
+         ng-class="{'success': res.fitPercentage >= 50, 'fail': res.fitPercentage < 50}">
+      <h3>📊 Candidate {{$index+1}} Fit Analysis</h3>
+      <p class="percentage">Fit Percentage: <strong>{{res.fitPercentage}}%</strong></p>
+      <!--p class="message">{{res.message}}</p-->
+    </div>
+  </div>
+
+  <!-- Progress Overlay -->
+  <div class="overlay" ng-show="c.loading">
+    <div class="progress-ring">
+      <svg class="circle-svg" viewBox="0 0 120 120">
+        <circle class="bg" cx="60" cy="60" r="54"></circle>
+        <circle class="progress" cx="60" cy="60" r="54"
+                stroke-dasharray="339.292"
+                stroke-dashoffset="{{c.strokeOffset}}">
+        </circle>
+      </svg>
+      <div class="percentage">{{c.progress}}%</div>
+      <p class="progress-label">Analyzing candidate fit...</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" ng-class="{active: c.activeTab==='jd'}" ng-click="c.activeTab='jd'">📝 Job Description</div>
+    <div class="tab"
+         ng-repeat="resume in c.resumeUrls track by $index"
+         ng-class="{active: c.activeTab==='resume' + $index}"
+         ng-click="c.activeTab='resume' + $index">
+         📑 Resume {{$index+1}}
+    </div>
+  </div>
+
+  <!-- Job Description Tab -->
+  <div class="tab-content" ng-show="c.activeTab==='jd'">
+    <iframe ng-if="c.jdUrl" ng-src="{{c.jdUrl}}" class="pdf-viewer"></iframe>
+    <p ng-if="!c.jdUrl" class="placeholder">No job description uploaded yet.</p>
+  </div>
+
+  <!-- Resume Tabs -->
+  <div class="tab-content" ng-repeat="resumeUrl in c.resumeUrls track by $index" ng-show="c.activeTab==='resume' + $index">
+    <iframe ng-if="resumeUrl" ng-src="{{resumeUrl}}" class="pdf-viewer"></iframe>
+    <p ng-if="!resumeUrl" class="placeholder">No resume uploaded yet.</p>
+  </div>
+</div>
