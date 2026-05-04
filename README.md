@@ -137,7 +137,7 @@ Step 9: Configure the View History Page
 The project includes a View History link:
 /sp1?id=job_history_details
 Create or configure this page to display previous job description and candidate evaluation records.
-How to Use
+How to Use:
 
 
 Open the ServiceNow portal page containing the widget.
@@ -164,21 +164,21 @@ Review candidate fit percentages and status.
 Open View History to review previous screening records.
 
 
-Example Output
+Example Output:
 CandidateFit PercentageStatusCandidate 188%EligibleCandidate 264%Need ReviewCandidate 342%Not Eligible
-Error Handling
+Error Handling:
 The system includes error handling for missing job descriptions, missing resumes, invalid file types, missing API keys, PDF extraction failure, OpenAI API failure, Gemini API failure, invalid AI responses, Regex parsing failure, and database insertion errors.
 If an error occurs, the backend logs the issue and returns a controlled response. This prevents the full workflow from crashing if one resume fails during batch processing.
-Project Limitations
+Project Limitations:
 The system depends on external AI APIs. Free-tier APIs may cause latency, rate limits, or timeout issues. Scanned PDFs may not extract correctly without OCR. AI responses may vary despite prompt engineering. Regex parsing depends on the AI including the FIT PERCENTAGE marker. The system is a decision-support tool and should not make final hiring decisions automatically. Human recruiter review is still required.
-Future Improvements
+Future Improvements:
 Future versions of the system could include OCR support for scanned resumes, structured JSON output instead of Regex parsing, recruiter override tracking, role-based access control, automatic interview scheduling, analytics dashboards, bias monitoring, fairness testing, local or private LLM deployment, and asynchronous background processing using ServiceNow Events or queues.
-Security Notes
+Security Notes:
 API keys should never be placed in frontend code. All external API communication should happen from the ServiceNow backend. Candidate resumes may contain personal information and should be protected using ServiceNow access controls. Only authorized recruiters and administrators should access stored evaluation records. For enterprise deployment, organizations should review data privacy and AI usage policies before processing real candidate data.
-Project Author
+Project Author:
 Sosan Ali Butt
 Department of Computer Science
 Ulster University
 Project Title: AI-Based Resume Matching and Job Description Analysis System Using ServiceNow
-License
+License:
 This project is developed for academic purposes as part of a Final Year Project or MSc project. Further use, deployment, or modification should follow the academic and organizational policies of the institution or company using it.
